@@ -23,16 +23,21 @@ public class Main {
             }
 
             long low = 0;
-            long high = 60000000000L;
+            long high = 60000000001L;
+
+            if(N - M <= 0){
+                System.out.println(N);
+                return;
+            }
 
             long mid = (low + high) / 2;
             while(low + 1 <high) {
-                if(getNumOfChildWhoBoarded(mid + 1) < N) {
+                if(getNumOfChildWhoBoarded(mid + 1) < N - M) {
                     low = mid;
-                } else if (getNumOfChildWhoBoarded(mid) >= N) {
+                } else if (getNumOfChildWhoBoarded(mid) >= N - M) {
                     high = mid;
                 } else {
-                    System.out.println(getAnswer(mid, N - getNumOfChildWhoBoarded(mid)));
+                    System.out.println(getAnswer(mid, N - M - getNumOfChildWhoBoarded(mid)));
                     return;
                 }
                 mid = (low + high) / 2;
@@ -55,11 +60,11 @@ public class Main {
     private static int getAnswer(long time, long numOfChildWhoDontBoarded) {
         List<Rides> ridesList = new ArrayList<>();
         for (int i = 0; i < M; i++) {
-            ridesList.add(new Rides(i, (int) (time % operationTime[i])));
+            ridesList.add(new Rides(i, (int) (operationTime[i] - time % operationTime[i])));
         }
         Collections.sort(ridesList);
 
-        return ridesList.get((int) numOfChildWhoDontBoarded).num + 1;
+        return ridesList.get((int) numOfChildWhoDontBoarded - 1).num + 1;
     }
 
     private static class Rides implements Comparable<Rides>{
