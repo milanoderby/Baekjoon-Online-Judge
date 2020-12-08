@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -25,6 +26,7 @@ public class Main {
                 buildingList.add(new Building(L, H, R));
             }
 
+            Collections.sort(buildingList);
             List<HeightChangePoint> answer = divideAndConquer(0, N - 1);
             for (int i = 0; i < answer.size(); i++) {
                 System.out.print(answer.get(i).x + " " + answer.get(i).y + " ");
@@ -50,76 +52,33 @@ public class Main {
 
         List<HeightChangePoint> result = new ArrayList<>();
         int height = 0;
-        int prevChosen = 0;
         int h1 = 0, h2 = 0;
         int i, j;
         for (i = 0, j = 0; i < heightChangePointList1.size() && j < heightChangePointList2.size(); ) {
-
             if (heightChangePointList1.get(i).x == heightChangePointList2.get(j).x) {
-                if (heightChangePointList1.get(i).y > heightChangePointList2.get(j).y) {
-                    height = heightChangePointList1.get(i).y;
-                    prevChosen = 1;
+                h1 = heightChangePointList1.get(i).y;
+                h2 = heightChangePointList2.get(j).y;
+
+                if (height != Math.max(h1, h2)) {
+                    height = Math.max(h1, h2);
                     result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
                 }
-                else {
-                    height = heightChangePointList2.get(j).y;
-                    prevChosen = 2;
-                    result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
-                }
+
+
                 i++;
                 j++;
-                continue;
-            }
-
-            if (heightChangePointList1.get(i).x < heightChangePointList2.get(j).x) {
+            } else if (heightChangePointList1.get(i).x < heightChangePointList2.get(j).x) {
                 h1 = heightChangePointList1.get(i).y;
-                if (prevChosen == 1) {
-                    if (h1 < h2) {
-                        height = h2;
-                        prevChosen = 2;
-                        result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
-                    } else {
-                        height = h1;
-                        prevChosen = 1;
-                        result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
-                    }
-                    if (h1 == 0 && h2 == 0) {
-                        height = 0;
-                        prevChosen = 0;
-                        result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
-                    }
-                } else {
-                    if (h1 > h2) {
-                        height = h1;
-                        prevChosen = 1;
-                        result.add(heightChangePointList1.get(i));
-                    }
+                if (height != Math.max(h1, h2)) {
+                    height = Math.max(h1, h2);
+                    result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
                 }
                 i++;
-            }
-            else {
+            } else {
                 h2 = heightChangePointList2.get(j).y;
-                if (prevChosen == 2) {
-                    if (h1 > h2) {
-                        height = h1;
-                        prevChosen = 1;
-                        result.add(new HeightChangePoint(heightChangePointList2.get(j).x, height));
-                    } else {
-                        height = h2;
-                        prevChosen = 2;
-                        result.add(new HeightChangePoint(heightChangePointList1.get(i).x, height));
-                    }
-                    if (h1 == 0 && h2 == 0) {
-                        height = 0;
-                        prevChosen = 0;
-                        result.add(new HeightChangePoint(heightChangePointList2.get(j).x, height));
-                    }
-                } else {
-                    if (h1 < h2) {
-                        height = h2;
-                        prevChosen = 2;
-                        result.add(heightChangePointList2.get(j));
-                    }
+                if (height != Math.max(h1, h2)) {
+                    height = Math.max(h1, h2);
+                    result.add(new HeightChangePoint(heightChangePointList2.get(j).x, height));
                 }
                 j++;
             }
@@ -136,12 +95,17 @@ public class Main {
         return result;
     }
 
-    private static class Building {
+    private static class Building  implements Comparable<Building>{
         int left, right, height;
         public Building (int left, int height, int right) {
             this.left = left;
             this.right = right;
             this.height = height;
+        }
+
+        @Override
+        public int compareTo(Building o) {
+            return this.left - o.left;
         }
     }
 
