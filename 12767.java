@@ -2,15 +2,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class Main {
     private static int N, K;
     private static Tree tree;
-    private static List<List<Integer>> treeShapeList;
-    private static List<Integer> treeShape;
+    private static List<Set<Integer>> treeShapeList;
+    private static Set<Integer> treeShape;
     private static int[][] inputValue;
     public static void main(String[] args) {
         try {
@@ -31,23 +32,15 @@ public class Main {
             treeShapeList = new ArrayList<>();
             for (int i = 0; i < N; i++) {
                 tree = new Tree();
-                treeShape = new ArrayList<>();
+                treeShape = new HashSet<>();
                 for (int j = 0; j < K; j++) {
                     int position = tree.addNode(inputValue[i][j]);
                     treeShape.add(position);
                 }
 
-                Collections.sort(treeShape);
                 boolean findSameTree = false;
-                for (List<Integer> prevTreeShape : treeShapeList) {
-                    boolean isSameTree = true;
-                    for (int k = 0; k < K; k++) {
-                        if (prevTreeShape.get(k) != treeShape.get(k)) {
-                            isSameTree = false;
-                        }
-                    }
-
-                    if (isSameTree) {
+                for (Set<Integer> prevTreeShape : treeShapeList) {
+                    if (prevTreeShape.containsAll(treeShape)) {
                         findSameTree = true;
                         break;
                     }
