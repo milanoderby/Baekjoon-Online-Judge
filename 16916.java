@@ -10,26 +10,25 @@ public class Main {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             S = br.readLine();
             P = br.readLine();
-
             failFunc = new int[P.length()];
-
             makeFailFunc();
 
-            for (int i = 0; i + P.length() <= S.length(); i++) {
-                for (int j = 0; j < S.length(); j++) {
-                    if (S.charAt(i + j) == P.charAt(j)) {
-                        j++;
-                        if (j >= P.length()) {
-                            System.out.println(1);
-                            return;
-                        }
+            for (int i = 0, j = 0; i + P.length() <= S.length(); ) {
+                if (S.charAt(i + j) == P.charAt(j)) {
+                    j++;
+                    if (j >= P.length()) {
+                        System.out.println(1);
+                        return;
+                    }
+                } else {
+                    if (j <= 0) {
+                        i++;
                     } else {
-                        i = j - failFunc[j - 1];
+                        i += j - failFunc[j - 1];
                         j = failFunc[j - 1];
                     }
                 }
             }
-
             System.out.println(0);
         }
         catch (IOException e){
@@ -38,21 +37,18 @@ public class Main {
         }
     }
 
-    private static void makeFailFunc () {
-        for (int i = 1, j = 0; i < S.length(); i++) {
-            if (S.charAt(i + j) == P.charAt(j)) {
+    private static void makeFailFunc() {
+        for (int i = 1, j = 0; i + j < P.length(); ) {
+            if (P.charAt(i + j) == P.charAt(j)) {
+                failFunc[i + j] = j + 1;
                 j++;
             } else {
-                j--;
-            }
-
-            if (j >= i) {
-                failFunc[i] = j + 1;
-                i++;
-            } else if (j < 0) {
-                failFunc[i] = 0;
-                j = 0;
-                i++;
+                if (j <= 0) {
+                    i++;
+                } else {
+                    i += j - failFunc[j - 1];
+                    j = failFunc[j - 1];
+                }
             }
         }
     }
