@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.StringTokenizer;
 
 public class Main {
     private static int N, Q;
@@ -14,15 +13,19 @@ public class Main {
             N = Integer.parseInt(br.readLine());
 
             Trie trie = new Trie();
-            StringTokenizer tokenizer = new StringTokenizer(br.readLine());
             for (int i = 0; i < N; i++) {
-                trie.insert(tokenizer.nextToken());
+                String s = br.readLine();
+                trie.insert(s);
             }
+            trie.makeFailureLink();
 
             Q = Integer.parseInt(br.readLine());
-            tokenizer = new StringTokenizer(br.readLine());
             for (int i = 0; i < Q; i++) {
-                String q = tokenizer.nextToken();
+                if (trie.find(br.readLine())){
+                    System.out.println("YES");
+                } else {
+                    System.out.println("NO");
+                }
             }
         }
         catch (IOException e){
@@ -36,6 +39,8 @@ public class Main {
 
         public Trie () {
             rootNode = new Node();
+            rootNode.failureLink = rootNode;
+            rootNode.isCompletePattern = false;
         }
 
         public void insert (String s) {
@@ -44,16 +49,34 @@ public class Main {
                 int charNum = s.charAt(i) - 'a';
                 if (temp.nextCharacter[charNum] == null) {
                     temp.nextCharacter[charNum] = new Node();
-                    if (i == s.length() - 1) {
-                        temp.isCompletePattern = true;
-                    }
                 }
                 temp = temp.nextCharacter[charNum];
+
+                if (i == s.length() - 1) {
+                    temp.isCompletePattern = true;
+                }
             }
         }
 
-        public void find (String q) {
+        public boolean find (String q) {
+            Node temp = rootNode;
+            boolean result = false;
+            for (int i = 0; i < q.length(); i++) {
+                int charNum = q.charAt(i) - 'a';
+                while (temp != rootNode && temp.nextCharacter[charNum] != null){
+                    temp = temp.failureLink;
+                }
 
+                if (temp.nextCharacter[charNum] != null) {
+                    temp = temp.nextCharacter[charNum];
+                }
+
+                if (temp.isCompletePattern) {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
         }
 
         public void makeFailureLink() {
@@ -64,33 +87,28 @@ public class Main {
                 nodeQueue.poll();
 
                 for (int i = 0; i < ALPHABET_KIND; i++) {
-                    if (cur.nextCharacter[i] == null) {
+                    Node next = cur.nextCharacter[i];
+                    if (next == null) {
                         continue;
                     }
 
-                    Node next = cur.nextCharacter[i];
                     if (cur == rootNode) {
                         next.failureLink = rootNode;
                         nodeQueue.add(next);
                         continue;
                     }
 
-                    Node temp = cur.failureLink;
-                    while (temp != null) {
-                        if (temp.nextCharacter[i] != null) {
-                            next.failureLink = temp.nextCharacter[i];
-                            break;
-                        }
+                    Node temp = cur;
+                    while (temp != rootNode && temp.nextCharacter[i] == null) {
                         temp = temp.failureLink;
                     }
+                    if (temp.nextCharacter[i] != null) {
+                        temp = temp.nextCharacter[i];
+                    }
+                    next.failureLink = temp;
 
-                    temp = next.failureLink;
-                    while (temp != null) {
-                        if (temp.isCompletePattern) {
-                            next.outputLink = temp;
-                            break;
-                        }
-                        temp = temp.failureLink;
+                    if (next.failureLink.isCompletePattern) {
+                        next.isCompletePattern = true;
                     }
                     nodeQueue.add(next);
                 }
@@ -101,8 +119,7 @@ public class Main {
     private static class Node {
         private Node[] nextCharacter;
         private Node failureLink;
-        private Node outputLink;
-        private boolean isCompletePattern;
+        private boolean isCompletePattern = false;
 
         public Node () {
             nextCharacter = new Node[ALPHABET_KIND];
