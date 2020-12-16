@@ -21,7 +21,8 @@ public class Main {
 
             Q = Integer.parseInt(br.readLine());
             for (int i = 0; i < Q; i++) {
-                if (trie.find(br.readLine())){
+                String q = br.readLine();
+                if (trie.find(q)){
                     System.out.println("YES");
                 } else {
                     System.out.println("NO");
@@ -40,7 +41,7 @@ public class Main {
         public Trie () {
             rootNode = new Node();
             rootNode.failureLink = rootNode;
-            rootNode.isCompletePattern = false;
+            rootNode.findPattern = false;
         }
 
         public void insert (String s) {
@@ -53,17 +54,16 @@ public class Main {
                 temp = temp.nextCharacter[charNum];
 
                 if (i == s.length() - 1) {
-                    temp.isCompletePattern = true;
+                    temp.findPattern = true;
                 }
             }
         }
 
         public boolean find (String q) {
             Node temp = rootNode;
-            boolean result = false;
             for (int i = 0; i < q.length(); i++) {
                 int charNum = q.charAt(i) - 'a';
-                while (temp != rootNode && temp.nextCharacter[charNum] != null){
+                while (temp != rootNode && temp.nextCharacter[charNum] == null) {
                     temp = temp.failureLink;
                 }
 
@@ -71,12 +71,11 @@ public class Main {
                     temp = temp.nextCharacter[charNum];
                 }
 
-                if (temp.isCompletePattern) {
-                    result = true;
-                    break;
+                if (temp.findPattern) {
+                    return true;
                 }
             }
-            return result;
+            return false;
         }
 
         public void makeFailureLink() {
@@ -94,21 +93,19 @@ public class Main {
 
                     if (cur == rootNode) {
                         next.failureLink = rootNode;
-                        nodeQueue.add(next);
-                        continue;
+                    } else {
+                        Node temp = cur.failureLink;
+                        while (temp != rootNode && temp.nextCharacter[i] == null) {
+                            temp = temp.failureLink;
+                        }
+                        if (temp.nextCharacter[i] != null) {
+                            temp = temp.nextCharacter[i];
+                        }
+                        next.failureLink = temp;
                     }
 
-                    Node temp = cur;
-                    while (temp != rootNode && temp.nextCharacter[i] == null) {
-                        temp = temp.failureLink;
-                    }
-                    if (temp.nextCharacter[i] != null) {
-                        temp = temp.nextCharacter[i];
-                    }
-                    next.failureLink = temp;
-
-                    if (next.failureLink.isCompletePattern) {
-                        next.isCompletePattern = true;
+                    if (next.failureLink.findPattern) {
+                        next.findPattern = true;
                     }
                     nodeQueue.add(next);
                 }
@@ -119,10 +116,11 @@ public class Main {
     private static class Node {
         private Node[] nextCharacter;
         private Node failureLink;
-        private boolean isCompletePattern = false;
+        private boolean findPattern;
 
         public Node () {
             nextCharacter = new Node[ALPHABET_KIND];
+            findPattern = false;
         }
     }
 }
