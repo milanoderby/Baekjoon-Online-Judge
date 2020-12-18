@@ -13,11 +13,8 @@ public class Main {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             T = Integer.parseInt(br.readLine());
-
-            StringTokenizer tokenizer = new StringTokenizer(br.readLine());
-
-
             for (int testCase = 0; testCase < T; testCase++) {
+                StringTokenizer tokenizer = new StringTokenizer(br.readLine());
                 n = Integer.parseInt(tokenizer.nextToken());
                 m = Integer.parseInt(tokenizer.nextToken());
 
@@ -25,6 +22,7 @@ public class Main {
                 marker = br.readLine();
 
                 Trie trie = new Trie();
+                trie.insert(marker);
                 for (int i = 0; i < marker.length(); i++) {
                     StringBuilder stringBuilder = new StringBuilder(marker);
                     for (int j = i + 1; j < marker.length(); j++) {
@@ -35,9 +33,9 @@ public class Main {
                     }
                 }
                 trie.makeFailureLink();
-                trie.find(DNA);
+                int answer = trie.find(DNA);
+                System.out.println(answer);
             }
-
         }
         catch (IOException e){
             e.printStackTrace();
@@ -50,8 +48,6 @@ public class Main {
 
         public Trie () {
             rootNode = new Node();
-            rootNode.failureLink = rootNode;
-            rootNode.isCompletePattern = false;
         }
 
         private int convertDnaToNum (char dna) {
@@ -84,33 +80,32 @@ public class Main {
                 temp = temp.nextCharacter[charNum];
 
                 if (i == s.length() - 1) {
-                    temp.isCompletePattern = true;
+                    temp.outputCnt = 1;
                 }
             }
         }
 
-        public boolean find (String q) {
+        public int find (String q) {
+            int findCount = 0;
             Node temp = rootNode;
             for (int i = 0; i < q.length(); i++) {
-                int charNum = q.charAt(i) - 'a';
-                while (temp != rootNode && temp.nextCharacter[charNum] == null){
+                int charNum = convertDnaToNum(q.charAt(i));
+                while (temp != rootNode && temp.nextCharacter[charNum] == null) {
                     temp = temp.failureLink;
                 }
 
                 if (temp.nextCharacter[charNum] != null) {
                     temp = temp.nextCharacter[charNum];
                 }
-
-                if (temp.isCompletePattern) {
-                    return true;
-                }
+                findCount += temp.outputCnt;
             }
-            return false;
+            return findCount;
         }
 
         public void makeFailureLink() {
             Queue<Node> nodeQueue = new LinkedList<>();
             nodeQueue.add(rootNode);
+
             while (!nodeQueue.isEmpty()) {
                 Node cur = nodeQueue.peek();
                 nodeQueue.poll();
@@ -128,14 +123,13 @@ public class Main {
                         while (temp != rootNode && temp.nextCharacter[i] == null) {
                             temp = temp.failureLink;
                         }
+
                         if (temp.nextCharacter[i] != null) {
                             temp = temp.nextCharacter[i];
                         }
                         next.failureLink = temp;
                     }
-                    if (next.failureLink.isCompletePattern) {
-                        next.isCompletePattern = true;
-                    }
+                    next.outputCnt += next.failureLink.outputCnt;
                     nodeQueue.add(next);
                 }
             }
@@ -145,12 +139,11 @@ public class Main {
     private static class Node {
         private Node[] nextCharacter;
         private Node failureLink;
-        private Node outputLink;
-        private boolean isCompletePattern;
+        private int outputCnt;
 
         public Node () {
             nextCharacter = new Node[DNA_KIND];
-            isCompletePattern = false;
+            outputCnt = 0;
         }
     }
 }
