@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class Main {
     private static String S;
-    private static int[] failFunction, myGroup, lcp;
+    private static int[] failFunction, myGroup, lcp, rank;
     private static List<Integer> suffixArray;
     private static int d;
     public static void main(String[] args) {
@@ -20,6 +20,8 @@ public class Main {
             failFunction = new int[S.length()];
             suffixArray = new ArrayList<>();
             myGroup = new int[S.length()];
+            lcp = new int[S.length()];
+            rank = new int[S.length()];
             for (int i = 0; i < S.length(); i++) {
                 suffixArray.add(i);
                 myGroup[i] = S.charAt(i);
@@ -36,15 +38,18 @@ public class Main {
             int K = 1;
             while (maxSubStringLength != 0) {
                 int count = 0;
-                for (int i = 1; i < S.length() - 1; i++) {
-                    if (failFunction[i] == maxSubStringLength) {
-                        count++;
+                for (int i = rank[S.length() - maxSubStringLength] + 1; i < S.length(); i++) {
+                    if (lcp[i] < maxSubStringLength) {
+                        break;
                     }
+                    count++;
                 }
-                answer.add(new SubString(maxSubStringLength, count + 2));
+
+                answer.add(new SubString(maxSubStringLength, count + 1));
                 maxSubStringLength = failFunction[maxSubStringLength - 1];
                 K++;
             }
+
             Collections.sort(answer, (o1, o2) ->
                 o1.length - o2.length
             );
@@ -77,25 +82,16 @@ public class Main {
         }
     }
 
-    private static class SubString {
-        int length;
-        int count;
-
-        public SubString (int length, int count) {
-            this.length = length;
-            this.count = count;
-        }
-    }
-
     private static void constructSa () {
+        SuffixComparator suffixComparator = new SuffixComparator();
         for (d = 1; ; d *= 2) {
-            Collections.sort(suffixArray, new SuffixComparator());
+            Collections.sort(suffixArray, suffixComparator);
 
             int groupNum = 0;
             int[] tempGroup = new int[S.length()];
             tempGroup[0] = groupNum;
             for (int i = 0; i < suffixArray.size() - 1; i++) {
-                if (Objects.compare(suffixArray.get(i), suffixArray.get(i+1), new SuffixComparator()) != 0) {
+                if (Objects.compare(suffixArray.get(i), suffixArray.get(i+1), suffixComparator) != 0) {
                     groupNum++;
                 }
                 tempGroup[i + 1] = groupNum;
@@ -129,13 +125,40 @@ public class Main {
     }
 
     private static void constructLCP() {
-        for(int i=0, k=0; i<S.length(); i++, k=Math.max(k-1, 0)){
-            // 마지막 접미사(길이 1)면 아무것도 안 함
-            if(myGroup[i] == S.length()-1) continue;
+        for (int i = 0; i < S.length(); i++) {
+            rank[suffixArray.get(i)] = i;
+        }
 
-            // 바로 아래 인접한 접미사와 비교하여 앞에서부터 몇 개의 글자가 일치하는지 센다
-            for(int j=suffixArray.get(myGroup[i]+1); S.charAt(i+k)==S.charAt(j+k); k++);
-            lcp[myGroup[i]] = k;
+        int len = 0;
+        for (int i = 0; i < S.length(); i++) {
+            int k = rank[i];
+            if (k > 0) {
+                int j = suffixArray.get(k - 1);
+
+                while (j + len < S.length() && i + len < S.length()) {
+                    if (S.charAt(j + len) == S.charAt(i + len)){
+                        len++;
+                    } else {
+                        break;
+                    }
+                }
+
+                lcp[k] = len;
+
+                if (len > 0) {
+                    len--;
+                }
+            }
+        }
+    }
+
+    private static class SubString {
+        int length;
+        int count;
+
+        public SubString (int length, int count) {
+            this.length = length;
+            this.count = count;
         }
     }
 }
