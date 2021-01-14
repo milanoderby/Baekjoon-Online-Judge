@@ -4,37 +4,35 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 public class Main {
-    private static int N, M;
-    private static int answer;
     public static void main(String[] args) {
         try {
+            int SIZE = 30;
+            int[][] answer = new int[SIZE][SIZE];
+            for (int i = 0; i < SIZE; i++) {
+                answer[1][i] = i;
+            }
+
+            for (int i = 2; i < SIZE; i++) {
+                for (int j = i; j < SIZE; j++) {
+                    for (int k = i - 1; k <= j - 1; k++) {
+                        answer[i][j] += answer[i - 1][k];
+                    }
+                }
+            }
+
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             int T = Integer.parseInt(br.readLine());
 
             for (int i = 0; i < T; i++) {
                 StringTokenizer tokenizer = new StringTokenizer(br.readLine());
-                N = Integer.parseInt(tokenizer.nextToken());
-                M = Integer.parseInt(tokenizer.nextToken());
-                answer = 0;
-                for (int j = 1; j <= M; j++) {
-                    getAnswer(1, j);
-                }
-                System.out.println(answer);
+                int N = Integer.parseInt(tokenizer.nextToken());
+                int M = Integer.parseInt(tokenizer.nextToken());
+                System.out.println(answer[N][M]);
             }
         }
         catch (IOException e){
             e.printStackTrace();
             System.out.println(e.getMessage());
-        }
-    }
-
-    private static void getAnswer(int num, int selectedNum) {
-        if (num == N) {
-            answer++;
-        }
-
-        for (int i = selectedNum + 1; i <= M; i++) {
-            getAnswer(num + 1, i);
         }
     }
 }
