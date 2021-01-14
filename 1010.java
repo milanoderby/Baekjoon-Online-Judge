@@ -23,8 +23,9 @@ public class Main {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             int T = Integer.parseInt(br.readLine());
 
+            StringTokenizer tokenizer;
             for (int i = 0; i < T; i++) {
-                StringTokenizer tokenizer = new StringTokenizer(br.readLine());
+                tokenizer = new StringTokenizer(br.readLine());
                 int N = Integer.parseInt(tokenizer.nextToken());
                 int M = Integer.parseInt(tokenizer.nextToken());
                 System.out.println(answer[N][M]);
