@@ -45,7 +45,7 @@ public class Main {
         a = findGroup(a);
         b = findGroup(b);
 
-        if (a < b) {
+        if (a <= b) {
             groupOfNum[b] = a;
         } else {
             groupOfNum[a] = b;
@@ -53,9 +53,11 @@ public class Main {
     }
 
     private static int findGroup(int num) {
-        while (num != groupOfNum[num]) {
-            num = groupOfNum[num];
+        if(num == groupOfNum[num]){
+            return num;
         }
-        return num;
+        int myGroup = findGroup(groupOfNum[num]);
+        groupOfNum[num] = myGroup;
+        return myGroup;
     }
 }
