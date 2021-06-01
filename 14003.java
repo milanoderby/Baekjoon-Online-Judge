@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 public class Main {
@@ -23,7 +21,8 @@ public class Main {
                 pushNode(inputNode[i]);
             }
         }
-        System.out.println(lisVector.size());
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        bw.append(lisVector.size() + "\n");
 
         Stack<Node> answerNode = new Stack<>();
         Node tempNode = lisVector.lastElement();
@@ -33,8 +32,9 @@ public class Main {
         }
 
         while(!answerNode.isEmpty()){
-            System.out.print(answerNode.pop().num + " ");
+            bw.append(answerNode.pop().num + " ");
         }
+        bw.flush();
     }
 
     private static void pushNode(Node node) {
