@@ -3,23 +3,20 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private static List<Integer>[] graph;
-    private static int[] weightOfVertex;
+    private static int[] countOfPerson;
     public static void main(String[] args) throws  IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         int N = Integer.parseInt(br.readLine());
-        weightOfVertex = new int[N + 1];
-
+        countOfPerson = new int[N + 1];
         StringTokenizer tokenizer = new StringTokenizer(br.readLine());
         for (int i = 1; i <= N; i++) {
-            weightOfVertex[i] = Integer.parseInt(tokenizer.nextToken());
+            countOfPerson[i] = Integer.parseInt(tokenizer.nextToken());
         }
 
         graph = new List[N + 1];
@@ -37,36 +34,39 @@ public class Main {
         }
 
         boolean[] isVisited = new boolean[N + 1];
-        int[][] maxWeightOfSubTree = new int[N + 1][2];
+        int[][] maxCountOfPerson = new int[N + 1][2];
         for (int i = 0; i <= N; i++) {
-            maxWeightOfSubTree[i][0] = -1;
-            maxWeightOfSubTree[i][1] = -1;
+            for (int j = 0; j < 2; j++) {
+                maxCountOfPerson[i][j] = -1;
+            }
         }
 
-        bw.append(Math.max(getMaxWeightOfSubTree(1, true, isVisited, maxWeightOfSubTree), getMaxWeightOfSubTree(1, false, isVisited, maxWeightOfSubTree)) + "");
+        int answer = Math.max(getMaxCountOfPerson(1, true, isVisited, maxCountOfPerson), getMaxCountOfPerson(1, false, isVisited, maxCountOfPerson));
+        bw.append(answer + "");
         bw.flush();
     }
 
-    private static int getMaxWeightOfSubTree(int root, boolean rootIsIncluded, boolean[] isVisited, int[][] maxWeightOfSubTree) {
-        int index = rootIsIncluded ? 1 : 0;
-        if (maxWeightOfSubTree[root][index] != -1) {
-            return maxWeightOfSubTree[root][index];
+    private static int getMaxCountOfPerson(int root, boolean rootIsIncluded, boolean[] isVisited, int[][] maxCountOfPerson) {
+        int isIncluded = rootIsIncluded ? 1 : 0;
+        if (maxCountOfPerson[root][isIncluded] != -1) {
+            return maxCountOfPerson[root][isIncluded];
         }
 
         isVisited[root] = true;
-        int weight = rootIsIncluded ? weightOfVertex[root] : 0;
+        int count = rootIsIncluded ? countOfPerson[root] : 0;
         for (Integer next : graph[root]) {
             if (!isVisited[next]) {
-                int tempWeight = getMaxWeightOfSubTree(next, false, isVisited, maxWeightOfSubTree);
+                int ifNextIsNotIncluded = getMaxCountOfPerson(next, false, isVisited, maxCountOfPerson);
                 if (rootIsIncluded) {
-                    weight += tempWeight;
+                    count += ifNextIsNotIncluded;
                 } else {
-                    weight += Math.max(tempWeight, getMaxWeightOfSubTree(next, true, isVisited, maxWeightOfSubTree));
+                    int ifNextIsIncluded = getMaxCountOfPerson(next, true, isVisited, maxCountOfPerson);
+                    count += Math.max(ifNextIsNotIncluded, ifNextIsIncluded);
                 }
             }
         }
         isVisited[root] = false;
 
-        return maxWeightOfSubTree[root][index] = weight;
+        return maxCountOfPerson[root][isIncluded] = count;
     }
 }
